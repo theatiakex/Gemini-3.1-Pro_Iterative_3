@@ -34,3 +34,24 @@ Following the Continuous Logging requirement and the Immutable Test Suite princi
 All 13 acceptance criteria tests passed seamlessly.
 I appended the results for Iteration 2, Attempt 1 to test_metrics.jsonl with a pass_rate_percentage of 100.
 The architecture remains resilient and the base logic continues to support new input formats exactly as intended. Let me know when we are ready to move on to the next iteration!
+
+
+### Iteration 3
+
+I have successfully integrated external shot change data into the Subtitle QC prototype as requested in Iteration 3.
+
+Implementation Details
+Following the SDD-First constraints and using the provided tests as our "Source of Truth":
+
+Internal Data Model Upgrade: I expanded the core Cue object by introducing an optional StartFrame parameter to its constructor and a corresponding read-only property. Because it relies on default parameter values (e.g., int? startFrame = null), this extension did not break backwards compatibility with Iteration1BasicRulesTests.cs or the existing subtitle parsers.
+Abstraction of External Data (DIP): To cleanly integrate shot changes without tightly coupling the rule engine to a specific data format, I introduced the IShotChangeProvider interface under SubtitleQc.Core.Qc.Abstractions. The interface exposes methods for getting collections of cut timestamps and cut frames.
+New Rules (OCP): I developed two new QC rules that utilize the IShotChangeProvider:
+CrossShotBoundaryCheckRule: Retrieves timestamps from the provider and fails a cue if any cut falls strictly between its start and end times.
+MinFramesFromShotChangeRule: Uses the provider's cut frames and the newly added StartFrame on the cue to ensure the subtitle start frame meets the minimal threshold from the nearest cut.
+Code Constraints: All new implementations remain clean, decoupled, and under the strict 20-line method limit constraint.
+Test Results & Telemetry
+Following the Continuous Logging requirement and the Immutable Test Suite principle, I executed dotnet test against the test suite:
+
+All 19 acceptance criteria tests (13 from earlier iterations + 6 new for Iteration 3) passed flawlessly.
+I appended the results for Iteration 3, Attempt 1 to test_metrics.jsonl with a pass_rate_percentage of 100.
+The system's modularity has proven highly effective at handling both new parsing formats and external validation data without disrupting existing architecture.
